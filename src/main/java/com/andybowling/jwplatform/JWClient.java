@@ -36,12 +36,13 @@ public class JWClient
     // DONE 4. Make urlpath a function arg so that any type of call can be made
     // DONE 4.5 Add other options to be consistent w/ python lib (host, protocol etc)
     // DONE 5. Custom exception handling
+    // DONE 5.25 Swallow Unirest Exception and throw something custom
     // DONE 5.5 Setters and getters
     // 6. Tests
     // WONT DO 7. Break out client and request into two separate classes maybe? Maybe not.
     // 8. Docstrings
     // DONE 8.5 Get into github
-    // 9. Add readme
+    // DONE 9. Add readme
     // DONE 9.5 add License
     // DONE 10. Conform to java coding standards (Indentation, var names, import order etc)
     // DONE 11. Move Sample usage into examples directory and remove main() method
@@ -166,7 +167,17 @@ public class JWClient
         this.version = version;
     }
 
-    protected static HttpResponse<JsonNode> makeResponse( GetRequest request ) throws JWPlatformException, UnirestException
+    public static String getCurrentTimestamp()
+    {
+        return Long.toString((long) (new Date()).getTime() / 1000);
+    }
+
+    public static String getRandomNonce()
+    {
+        return Integer.toString(ThreadLocalRandom.current().nextInt(10000000, 100000000));
+    }
+
+    protected static HttpResponse<JsonNode> makeResponse( GetRequest request ) throws JWPlatformException
     {
         HttpResponse<JsonNode> response;
         try
@@ -194,10 +205,8 @@ public class JWClient
 
         orderedParams.put("api_key", this.apiKey);
         orderedParams.put("api_format", this.API_FORMAT);
-        String apiNonce = Integer.toString(ThreadLocalRandom.current().nextInt(10000000, 100000000));
-        orderedParams.put("api_nonce", apiNonce);
-        String apiTimestamp = Long.toString((long) (new Date()).getTime() / 1000);
-        orderedParams.put("api_timestamp", apiTimestamp);
+        orderedParams.put("api_nonce", this.getRandomNonce());
+        orderedParams.put("api_timestamp", this.getCurrentTimestamp());
 
         // Encode each query param and bulid into query string
         StringBuilder encodedParams = new StringBuilder();
@@ -221,7 +230,7 @@ public class JWClient
     }
 
     public JSONObject request( String path, Map<String, String> params
-                                    ) throws JWPlatformException, UnsupportedEncodingException, UnirestException
+                                    ) throws JWPlatformException, UnsupportedEncodingException
     {
         /**
          * Generates API signature, makes request to JWPlatform and returns result
