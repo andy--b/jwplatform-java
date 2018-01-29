@@ -7,7 +7,7 @@ import junit.framework.TestSuite;
 /**
  * Unit test for simple App.
  */
-public class JWPlatformTest
+public class JWClientTest
     extends TestCase
 {
     /**
@@ -15,7 +15,7 @@ public class JWPlatformTest
      *
      * @param testName name of the test case
      */
-    public JWPlatformTest( String testName )
+    public JWClientTest( String testName )
     {
         super( testName );
     }
@@ -25,7 +25,7 @@ public class JWPlatformTest
      */
     public static Test suite()
     {
-        return new TestSuite( JWPlatformTest.class );
+        return new TestSuite( JWClientTest.class );
     }
 
     /**
