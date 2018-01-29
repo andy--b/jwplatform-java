@@ -23,7 +23,7 @@ import com.andybowling.jwplatform.jwexceptions.JWExceptions;
 import com.andybowling.jwplatform.jwexceptions.JWExceptions.*;
 
 /**
- * Hello media api!
+ * Hello media api! Master class for making API calls to jwplatform
  *
  */
 public class JWClient
@@ -44,7 +44,7 @@ public class JWClient
     // 9. Add readme
     // DONE 9.5 add License
     // DONE 10. Conform to java coding standards (Indentation, var names, import order etc)
-    // 11. Move Sample usage into examples directory and remove main() method
+    // DONE 11. Move Sample usage into examples directory and remove main() method
 
     protected final String API_FORMAT = "json";
     protected String agent;
@@ -166,7 +166,7 @@ public class JWClient
         this.version = version;
     }
 
-    protected HttpResponse<JsonNode> makeResponse( GetRequest request ) throws JWPlatformException, UnirestException
+    protected static HttpResponse<JsonNode> makeResponse( GetRequest request ) throws JWPlatformException, UnirestException
     {
         HttpResponse<JsonNode> response;
         try
@@ -187,16 +187,8 @@ public class JWClient
         return response;
     }
 
-    public JSONObject request( String path, Map<String, String> params
-                                    ) throws JWPlatformException, UnsupportedEncodingException, UnirestException
+    public String makeRequestURL( String path, Map<String, String> params ) throws UnsupportedEncodingException
     {
-        /*
-        * Generates API signature, makes request to JWPlatform and returns result
-        * See https://developer.jwplayer.com/jw-platform/reference/v1/authentication.html
-        * for definition of authentication steps
-        */
-
-        // Add key, format, random nonce, and current timestamp to list of params
         TreeMap<String, String> orderedParams = new TreeMap<String, String>();
         orderedParams.putAll(params);
 
@@ -225,33 +217,24 @@ public class JWClient
         String finalParams = paramsNoSignature + "&api_signature=" + hexDigest;
 
         String url = this.scheme + "://" + this.host + this.getPortFormatted() + '/' + this.version + '/' + path;
-        GetRequest request =  Unirest.get(url + "?" + finalParams)
-            .header("accept", "application/json")
-            .header("User-Agent", this.getAgent());
-
-        return makeResponse(request).getBody().getObject();
-
+        return url + "?" + finalParams;
     }
 
-    public static void main( String[] args ) throws JWPlatformException, UnirestException, UnsupportedEncodingException
+    public JSONObject request( String path, Map<String, String> params
+                                    ) throws JWPlatformException, UnsupportedEncodingException, UnirestException
     {
-        /*
-        * Sample usage that:
-        * 1. Creates API client using apiKey, apiSecret, and (optional) host
-        * 2. Makes API request for videos/list with (optional) custom search param
-        * 3. Prints result
-        */
-        String apiKey = "AnAPIKey";
-        String apiSecret = "YourTwentyFourCharSecret";
-        HashMap<String, String> clientParams = new HashMap<String, String>();
-        clientParams.put("host", "api.jwplatform.com");
+        /**
+         * Generates API signature, makes request to JWPlatform and returns result
+         * See https://developer.jwplayer.com/jw-platform/reference/v1/authentication.html
+         * for definition of authentication steps
+        **/
 
-        HashMap<String, String> params = new HashMap<String, String>();
-        // Sample query param. Any valid query parameter(s) work here
-        params.put("search", "historic");
+        // Add key, format, random nonce, and current timestamp to list of params
+        String requestURL = this.makeRequestURL(path, params);
+        GetRequest request =  Unirest.get(requestURL)
+            .header("accept", "application/json")
+            .header("User-Agent", this.getAgent());
+        return makeResponse(request).getBody().getObject();
 
-        JWClient c = new JWClient(apiKey, apiSecret, clientParams);
-        JSONObject jsonResponse = c.request("videos/list", params);
-        System.out.println(jsonResponse.toString(2));
     }
 }
