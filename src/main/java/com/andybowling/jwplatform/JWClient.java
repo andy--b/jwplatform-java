@@ -36,8 +36,8 @@ public class JWClient
     protected String scheme = "https";
     protected String version = "v1";
 
-    public JWClient(String apiKey, String apiSecret, HashMap<String, String> params)
-                                                    throws IllegalArgumentException
+    public JWClient(String apiKey, String apiSecret, HashMap<String, String> params
+            ) throws IllegalArgumentException
     {
         this.apiKey = apiKey;
         this.apiSecret = apiSecret;
@@ -75,6 +75,12 @@ public class JWClient
         {
             throw new IllegalArgumentException("Illegal param(s) passed: " + paramsClone.keySet());
         }
+    }
+
+    public JWClient(String apiKey, String apiSecret
+            ) throws IllegalArgumentException
+    {
+        this(apiKey, apiSecret, new HashMap<String, String>());
     }
 
     public String getAgent()
@@ -158,7 +164,7 @@ public class JWClient
         return Integer.toString(ThreadLocalRandom.current().nextInt(10000000, 100000000));
     }
 
-    protected static HttpResponse<JsonNode> makeResponse( GetRequest request ) throws JWPlatformException
+    protected static HttpResponse<JsonNode> makeResponse(GetRequest request ) throws JWPlatformException
     {
         HttpResponse<JsonNode> response;
         try
@@ -179,7 +185,7 @@ public class JWClient
         return response;
     }
 
-    public String makeRequestURL( String path, Map<String, String> params ) throws UnsupportedEncodingException
+    public String makeRequestURL(String path, Map<String, String> params ) throws UnsupportedEncodingException
     {
         TreeMap<String, String> orderedParams = new TreeMap<String, String>();
         orderedParams.putAll(params);
@@ -210,7 +216,7 @@ public class JWClient
         return url + "?" + finalParams;
     }
 
-    public JSONObject request( String path, Map<String, String> params
+    public JSONObject request(String path, Map<String, String> params
                                     ) throws JWPlatformException, UnsupportedEncodingException
     {
         /**
@@ -226,5 +232,11 @@ public class JWClient
             .header("User-Agent", this.getAgent());
         return makeResponse(request).getBody().getObject();
 
+    }
+
+    public JSONObject request(String path
+                                ) throws JWPlatformException, UnsupportedEncodingException
+    {
+        return this.request(path, new HashMap<String, String>());
     }
 }
